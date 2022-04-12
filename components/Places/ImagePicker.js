@@ -10,7 +10,8 @@ import { backgroundColor } from "react-native/Libraries/Components/View/ReactNat
 import { Colors } from "../../constants/colors";
 import OutlineButton from "../UI/OutlineButton";
 
-const ImagePicker = () => {
+const ImagePicker = (props) => {
+  const { onTakeImage } = props;
   const [cameraPermissionInfo, requestPermission] = useCameraPermissions();
   const [pickedImage, setPickedImage] = useState();
 
@@ -35,13 +36,18 @@ const ImagePicker = () => {
     const hasPermission = await verifyPermissions();
 
     if (!hasPermission) return;
-
-    const image = await launchCameraAsync({
-      allowsEditing: true,
-      aspect: [16, 9],
-      quality: 0.5,
-    });
-    setPickedImage(image.uri);
+    try {
+      const image = await launchCameraAsync({
+        allowsEditing: true,
+        aspect: [16, 9],
+        quality: 0.5,
+      });
+      setPickedImage(image.uri);
+      onTakeImage(image.uri);
+    } catch (error) {
+      Alert.alert("Camera Error!", error.message);
+      console.log("takeImageHandler error ==>", error.message);
+    }
   };
 
   let imagePreview = <Text>No image taken yet.</Text>;

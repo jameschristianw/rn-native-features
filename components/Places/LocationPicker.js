@@ -10,7 +10,7 @@ import {
 import { Colors } from "../../constants/colors";
 
 import OutlineButton from "../UI/OutlineButton";
-import { getMapPreview } from "../../util/location";
+import { getAddress, getMapPreview } from "../../util/location";
 import {
   useNavigation,
   useRoute,
@@ -18,6 +18,8 @@ import {
 } from "@react-navigation/native";
 
 const LocationPicker = (props) => {
+  const { onPickLocation } = props;
+
   const [pickedLocation, setPickedLocation] = useState(null);
 
   const navigation = useNavigation();
@@ -37,6 +39,20 @@ const LocationPicker = (props) => {
       setPickedLocation(mapPickedLocation);
     }
   }, [route, isFocused]);
+
+  useEffect(() => {
+    const handleLocation = async () => {
+      if (pickedLocation) {
+        const address = await getAddress(
+          pickedLocation.latitude,
+          pickedLocation.longitude
+        );
+        onPickLocation({ ...pickedLocation, address: address });
+      }
+    };
+
+    handleLocation();
+  }, [pickedLocation, onPickLocation]);
 
   const verifyPermissions = async () => {
     if (locationPermissionInfo.status === PermissionStatus.UNDETERMINED) {
