@@ -1,5 +1,7 @@
 import { StatusBar } from "expo-status-bar";
 
+import { useEffect, useState } from "react";
+
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
@@ -9,10 +11,29 @@ import Map from "./screens/Map";
 
 import IconButton from "./components/UI/IconButton";
 import { Colors } from "./constants/colors";
+import { initDB } from "./util/database";
+import AppLoading from "expo-app-loading";
+import PlaceDetail from "./screens/PlaceDetail";
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
+  const [isDBInitialized, setIsDBInitialized] = useState(false);
+
+  useEffect(() => {
+    initDB()
+      .then(() => {
+        setIsDBInitialized(true);
+      })
+      .catch((error) => {
+        console.log("AppLoading error ==>", error);
+      });
+  }, []);
+
+  if (!isDBInitialized) {
+    return <AppLoading />;
+  }
+
   return (
     <>
       <StatusBar style="dark" />
@@ -49,6 +70,13 @@ export default function App() {
             })}
           />
           <Stack.Screen name="Map" component={Map} options={{}} />
+          <Stack.Screen
+            name="PlaceDetail"
+            component={PlaceDetail}
+            options={() => ({
+              title: "Loading detail",
+            })}
+          />
         </Stack.Navigator>
       </NavigationContainer>
     </>

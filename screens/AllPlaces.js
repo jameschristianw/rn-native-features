@@ -2,6 +2,7 @@ import { useIsFocused } from "@react-navigation/native";
 import { useState, useEffect } from "react";
 import { SafeAreaView } from "react-native";
 import PlacesList from "../components/Places/PlacesList";
+import { fetchPlaces } from "../util/database";
 
 const AllPlaces = (props) => {
   const { route } = props;
@@ -11,10 +12,15 @@ const AllPlaces = (props) => {
   const isFocused = useIsFocused();
 
   useEffect(() => {
-    if (isFocused && route.params) {
-      setLoadedPlace((currentPlaces) => [...currentPlaces, route.params.place]);
+    async function loadPlaces() {
+      const places = await fetchPlaces();
+      setLoadedPlace(places);
     }
-  }, [isFocused, route]);
+
+    if (isFocused) {
+      loadPlaces();
+    }
+  }, [isFocused]);
 
   return (
     <SafeAreaView>

@@ -4,8 +4,13 @@ import { useState, useLayoutEffect, useCallback } from "react";
 import IconButton from "../components/UI/IconButton";
 
 const Map = (props) => {
-  const { navigation } = props;
-  const [selectedLocation, setSelectedLocation] = useState();
+  const { navigation, route } = props;
+  const initialLocation = route.params && {
+    lat: route.params.initialLat,
+    lng: route.params.initialLng,
+  };
+
+  const [selectedLocation, setSelectedLocation] = useState(initialLocation);
 
   const savePickedLocationHandler = useCallback(() => {
     if (!selectedLocation) {
@@ -20,9 +25,10 @@ const Map = (props) => {
       pickedLat: selectedLocation.lat,
       pickedLong: selectedLocation.lng,
     });
-  }, [navigation, selectedLocation]);
+  }, [navigation, savePickedLocationHandler, initialLocation]);
 
   useLayoutEffect(() => {
+    if (initialLocation) return;
     navigation.setOptions({
       headerRight: ({ tintColor }) => (
         <IconButton
@@ -33,16 +39,18 @@ const Map = (props) => {
         />
       ),
     });
-  }, [navigation, savePickedLocationHandler]);
+  }, [navigation, savePickedLocationHandler, initialLocation]);
 
   const region = {
-    latitude: -6.224021,
-    longitude: 106.843756,
+    latitude: initialLocation ? initialLocation.lat : -6.224021,
+    longitude: initialLocation ? initialLocation.lng : 106.843756,
     latitudeDelta: 0.0922,
     longitudeDelta: 0.0421,
   };
 
   const selectLocationHandler = (event) => {
+    if (initialLocation) return;
+
     const lat = event.nativeEvent.coordinate.latitude;
     const long = event.nativeEvent.coordinate.longitude;
 
